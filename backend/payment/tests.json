@@ -1,0 +1,34 @@
+{
+  "tests": [
+    {
+      "name": "Test successful SBP payment",
+      "method": "POST",
+      "path": "/",
+      "body": {
+        "user_id": 1,
+        "payment_method": "sbp",
+        "amount": 299
+      },
+      "expectedStatus": 200,
+      "expectedBody": {
+        "success": true,
+        "status": "completed",
+        "message": "string"
+      },
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "Test missing user_id",
+      "method": "POST",
+      "path": "/",
+      "body": {
+        "payment_method": "card"
+      },
+      "expectedStatus": 400,
+      "expectedBody": {
+        "error": "string"
+      },
+      "bodyMatcher": "partial"
+    }
+  ]
+}

@@ -43,13 +43,57 @@ const PremiumSection = () => {
     },
   ];
 
-  const handlePayment = () => {
+  const handlePayment = async () => {
     if (!paymentMethod) return;
 
-    toast({
-      title: "Демо версия",
-      description: "В реальной версии здесь будет интеграция с платёжными системами",
-    });
+    const user = JSON.parse(localStorage.getItem('wix_user') || '{}');
+    
+    if (!user.id) {
+      toast({
+        title: "Ошибка",
+        description: "Необходимо войти в систему",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const response = await fetch('https://functions.poehali.dev/fc0ca1b0-e625-494f-8c69-db73c0cadfa4', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          user_id: user.id,
+          payment_method: paymentMethod,
+          amount: 299,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        user.is_premium = true;
+        localStorage.setItem('wix_user', JSON.stringify(user));
+        
+        toast({
+          title: "Успешно!",
+          description: data.message,
+        });
+      } else {
+        toast({
+          title: "Ошибка",
+          description: data.error || "Ошибка обработки платежа",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Ошибка",
+        description: "Ошибка подключения к серверу",
+        variant: "destructive",
+      });
+    }
     
     setIsPaymentDialogOpen(false);
     setPaymentMethod(null);

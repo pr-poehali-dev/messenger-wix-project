@@ -49,9 +49,34 @@ const Registration = ({ onComplete }: RegistrationProps) => {
     }
   };
 
-  const handleAvatarSelect = () => {
+  const handleAvatarSelect = async () => {
     if (selectedAvatar) {
-      onComplete({ phone, nickname, username, avatar: selectedAvatar });
+      try {
+        const response = await fetch('https://functions.poehali.dev/5177b43f-2ac2-4e49-9505-46314bd3e396', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            action: 'register',
+            phone,
+            nickname,
+            username,
+            avatar: selectedAvatar,
+          }),
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.success) {
+          localStorage.setItem('wix_user', JSON.stringify(data.user));
+          onComplete({ phone, nickname, username, avatar: selectedAvatar });
+        } else {
+          alert(data.error || 'Ошибка регистрации');
+        }
+      } catch (error) {
+        alert('Ошибка подключения к серверу');
+      }
     }
   };
 
